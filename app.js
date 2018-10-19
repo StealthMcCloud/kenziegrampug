@@ -14,24 +14,33 @@ app.set("view engine", "pug")
 const uploadedFiles = [];
 
 app.get('/', function (req, res) {
-  res.render('index', { title: 'Kenziegram With Pug', message: 'Welcome to Kenziegram With Pug' })
+  const path = './public/uploads';
+  fs.readdir(path, function (err, items) {
+    res.render('index', { title: 'Kenziegram With Pug', message: 'Welcome to Kenziegram With Pug', array: items })
+  })
 })
 
-  // app.get('/', (request, response) => {
-  //   const path = './public/uploads';
-  //   fs.readdir(path, function (err, items) {
-  //     console.log(items);
-  //     response.send(`
-  //   ${pictureDisplayer(items)}`);
-  //   })
-  // });
+function pictureDisplayer(imgNames) {
+  let outputString = "";
+  for (let i = 0; i < imgNames.length; i++) {
+    const name = imgNames[i];
+    outputString += `<img src="uploads/${name}"/>`
+  }
+  return outputString;
+}
 
-  app.post('/uploads', upload.single('myFile'), function (request, response, next) {
-    console.log("Uploaded: " + request.file.filename);
-    uploadedFiles.push(request.file.filename);
-    response.end(`<h1>Congratulations you clicked a button!!!!</h1>
-  <a href="/">Click here to go back!</a>
-  <img src="uploads/${request.file.filename}"/>`);
-  })
+// app.get('/', (request, response) => {
+//   const path = './public/uploads';
+//   fs.readdir(path, function (err, items) {
+//     console.log(items);
+//     response.send(`
+//     ${pictureDisplayer(items)}`);
+//   })
+// });
 
-  app.listen(port, () => console.log("Server running on " + port))
+app.post('/uploads', upload.single('myFile'), function (request, response, next) {
+  uploadedFiles.push(request.file.filename);
+  response.render('uploads', { title: 'Uploaded Picture With Pug', message: 'Congratulations you have clicked a button to upload a picture!!!', image: request.file.filename });
+})
+
+app.listen(port, () => console.log("Server running on " + port))
